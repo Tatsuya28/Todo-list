@@ -2,20 +2,33 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <script src="https://unpkg.com/htmx.org@1.9.2"></script>
     <title>Todo List</title>
 </head>
 <body>
     <h1>Todo List</h1>
 
-    {% for collection in collections %}
-        <h2>{{ collection.name }}</h2>
-    {% endfor %}
+    <div id="collections">
+        {% for collection in collections %}
+            <h2>{{ collection.name }}</h2>
+        {% endfor %}
+    </div>
 
-    <form method="POST" action="{% url 'add-collection' %}">
+    <form method="POST">
         {% csrf_token %}
         <label for="name-collection">Nom de la collection</label>
         <input type="text" name="collection-name" id="name-collection">
-        <button type="submit">Ajouter</button>
+        <button hx-post="{% url 'add-collection' %}"
+                hx-target="#collections"
+                hx-swap="beforeend"
+                type="submit">Ajouter</button>
     </form>
+
+
+    <script>
+        document.body.addEventListener("htmx:responseError", function(evt) {
+            alert(evt.detail.xhr.responseText);
+        })
+    </script>
 </body>
 </html>
