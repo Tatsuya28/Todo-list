@@ -10,13 +10,14 @@
 
     <div id="collections">
         {% for collection in collections %}
-            <h2>{{ collection.name }}</h2>
+            <button hx-get="{% url 'get-tasks' collection.pk %}"
+                    hx-target="#tasks">{{ collection.name }}</button>
         {% endfor %}
     </div>
 
     <form method="POST">
         {% csrf_token %}
-        <label for="name-collection">Nom de la collection</label>
+        <label for="name-collection">Nom de la collection : </label>
         <input type="text" name="collection-name" id="name-collection">
         <button hx-post="{% url 'add-collection' %}"
                 hx-target="#collections"
@@ -24,6 +25,19 @@
                 type="submit">Ajouter</button>
     </form>
 
+    <form method="POST">
+        {% csrf_token %}
+        <label for="name-task">Description de la tâche : </label>
+        <input type="text" name="task-description" id="name-description">
+        <button hx-post="{% url 'add-task' %}"
+                hx-target="#tasks"
+                hx-swap="beforeend"
+                type="submit">Ajouter</button>
+    </form>
+
+    <div id="tasks">
+        {% include 'tasks/tasks.html' with tasks=tasks %}
+    </div>
 
     <script>
         document.body.addEventListener("htmx:responseError", function(evt) {
