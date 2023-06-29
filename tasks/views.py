@@ -32,7 +32,7 @@ def add_collection(request):
 
 
 def add_task(request):
-    collection = Collection.get_default_collection()
+    collection = Collection.objects.get(slug=request.POST.get("collection"))
 
     description = escape(request.POST.get("task-description"))
     Task.objects.create(description=description, collection=collection)
