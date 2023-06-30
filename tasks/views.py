@@ -2,6 +2,7 @@ from html import escape
 
 from django.http import HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.utils.text import slugify
 
 from tasks.models import Collection, Task
@@ -12,11 +13,14 @@ def index(request):
     context = {}
 
     collection_slug = request.GET.get("collection")
-    collection = Collection.get_default_collection()
-    if collection_slug:
-        collection = get_object_or_404(Collection, slug=collection_slug)
+
+    if not collection_slug:
+        Collection.get_default_collection()
+        return redirect(f"{reverse('home')}?collection=_defaut")
+    collection = get_object_or_404(Collection, slug=collection_slug)
 
     context["collections"] = Collection.objects.order_by("slug")
+    context["collection"] = collection
     context["tasks"] = collection.task_set.order_by("description")
 
     return render(request, 'tasks/index.html', context=context)
@@ -30,6 +34,12 @@ def add_collection(request):
         return HttpResponse("La collection existe déjà.", status=409)
     return render(request, 'tasks/collection.html', context={"collection": collection})
 
+
+def delete_collection(request, collection_pk):
+    collection = get_object_or_404(Collection, pk=collection_pk)
+    collection.delete()
+
+    return redirect('home')
 
 def add_task(request):
     collection = Collection.objects.get(slug=request.POST.get("collection"))
@@ -50,5 +60,6 @@ def delete_task(request, task_pk):
 def get_tasks(request, collection_pk):
     collection = get_object_or_404(Collection, pk=collection_pk)
     tasks = collection.task_set.order_by("description")
-    return render(request, 'tasks/tasks.html', context={"tasks": tasks})
+
+    return render(request, 'tasks/tasks.html', context={"tasks": tasks, "collection": collection})
     # return HttpResponse("<br>".join(task.description for task in tasks)) # Not secure

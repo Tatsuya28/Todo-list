@@ -36,7 +36,7 @@
     </form>
 
     <div id="tasks">
-        {% include 'tasks/tasks.html' with tasks=tasks %}
+        {% include 'tasks/tasks.html' with tasks=tasks collection=collection%}
     </div>
 
     <script>
