@@ -1,3 +1,6 @@
-<button hx-get="{% url 'get-tasks' collection.pk %}"
-        hx-target="#tasks"
-        hx-push-url="?collection={{ collection.slug }}">{{ collection.name }}</button>
+<button class="collection-btn {% if request.GET.collection == collection.slug %}active{% endif %}"
+        hx-get="{% url 'get-tasks' collection.pk %}"
+        hx-target="#tasks-container"
+        hx-push-url="?collection={{ collection.slug }}">
+    {{ collection.name }}
+</button>

@@ -5,5 +5,6 @@
     <button hx-post="{% url 'delete-task' task.pk %}"
             hx-target="closest form"
             hx-swap="outerHTML"
-            type="submit">Supprimer</button>
+            hx-confirm="Voulez-vous vraiment supprimer cette tâche ?"
+            type="submit">-</button>
 </form>

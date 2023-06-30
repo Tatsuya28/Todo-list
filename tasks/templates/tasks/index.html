@@ -1,54 +1,86 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <script src="https://unpkg.com/htmx.org@1.9.2"></script>
+    <link rel="stylesheet" type="text/css" href="{% static 'css/style.css' %}">
     <title>Todo List</title>
 </head>
 <body>
-    <h1>Todo List</h1>
 
-    <div id="collections">
-        {% for collection in collections %}
-           {% include 'tasks/collection.html' with collection=collection %}
-        {% endfor %}
+<div class="container">
+
+    <div class="navbar">
+        <header>
+            <h1>Todo List</h1>
+        </header>
+        <nav id="collections">
+            {% for collection in collections %}
+                {% include 'tasks/collection.html' with collection=collection %}
+            {% endfor %}
+        </nav>
+
+        <form method="POST">
+            {% csrf_token %}
+            {#            <label for="name-collection">Nom de la collection : </label>#}
+            <input type="text" name="collection-name" id="name-collection" placeholder="Collection...">
+            <button hx-post="{% url 'add-collection' %}"
+                    hx-target="#collections"
+                    hx-swap="beforeend"
+                    type="submit">+
+            </button>
+        </form>
     </div>
 
-    <form method="POST">
-        {% csrf_token %}
-        <label for="name-collection">Nom de la collection : </label>
-        <input type="text" name="collection-name" id="name-collection">
-        <button hx-post="{% url 'add-collection' %}"
-                hx-target="#collections"
-                hx-swap="beforeend"
-                type="submit">Ajouter</button>
-    </form>
+    <main>
+        <form method="POST">
+            {% csrf_token %}
+            {#                <label for="name-task">Description de la tâche : </label>#}
+            <input type="text" name="task-description" id="name-description" placeholder="Tâche...">
+            <button hx-post="{% url 'add-task' %}"
+                    hx-target="#tasks"
+                    hx-vals='js:{collection: getCollectionFromURL()}'
+                    hx-swap="beforeend"
+                    type="submit">Ajouter
+            </button>
+        </form>
 
-    <form method="POST">
-        {% csrf_token %}
-        <label for="name-task">Description de la tâche : </label>
-        <input type="text" name="task-description" id="name-description">
-        <button hx-post="{% url 'add-task' %}"
-                hx-target="#tasks"
-                hx-vals='js:{collection: getCollectionFromURL()}'
-                hx-swap="beforeend"
-                type="submit">Ajouter</button>
-    </form>
+        <div id="tasks-container">
+            {% include 'tasks/tasks.html' with tasks=tasks collection=collection %}
+        </div>
+    </main>
+</div>
+<script>
+    document.body.addEventListener("htmx:responseError", function (evt) {
+        alert(evt.detail.xhr.responseText);
+    })
 
-    <div>
-        {% include 'tasks/tasks.html' with tasks=tasks collection=collection%}
-    </div>
+    document.addEventListener('DOMContentLoaded', function () {
+        const collectionButtons = document.querySelectorAll('.collection-btn');
 
-    <script>
-        document.body.addEventListener("htmx:responseError", function(evt) {
-            alert(evt.detail.xhr.responseText);
-        })
+        collectionButtons.forEach(function (button) {
+            button.addEventListener('click', function () {
+                // Supprimer la classe active de tous les boutons de collection
+                collectionButtons.forEach(function (btn) {
+                    btn.classList.remove('active');
+                });
 
-        function getCollectionFromURL() {
-            let url = new URL(window.location.href);
-            let searchParams = url.searchParams;
-            return searchParams.get('collection')
-        }
-    </script>
+                // Ajouter la classe active au bouton cliqué
+                this.classList.add('active');
+            });
+        });
+    });
+
+
+    function getCollectionFromURL() {
+        let url = new URL(window.location.href);
+        let searchParams = url.searchParams;
+        return searchParams.get('collection')
+    }
+</script>
 </body>
 </html>
